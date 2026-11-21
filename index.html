@@ -404,5 +404,68 @@
   recalc();
 </script>
 
-</body>
+</body> <script>
+  // আপনার Supabase প্রজেক্ট URL এবং anon key এখানে বসান
+  const SUPABASE_URL = 'https://dtwdwcfbxbchcwjqgwel.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0d2R3Y2ZieGJjaGN3anFnd2VsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUyODI3NDIsImV4cCI6MjExMDg1ODc0Mn0._YYJrVVjDwm0sXwQJn5ik5zBaK6YN1KUmzSQ_uiJSqw';
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ফর্ম সাবমিট ইভেন্ট
+  document.getElementById('applyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const msg = document.getElementById('formMsg');
+
+    // ১. প্রথমে ইউজার সাইন-ইন করান (ডেমোতে 익익명 সাইন-ইন)
+    // বাস্তবে ইমেইল/পাসওয়ার্ড লগইন ব্যবহার করবেন
+    const { data: { user }, error: authError } = await supabase.auth.signInAnonymously();
+    if (authError) {
+      msg.textContent = '❌ লগইন ব্যর্থ: ' + authError.message;
+      msg.style.color = 'var(--danger)';
+      return;
+    }
+
+    // ২. ফর্ম ডেটা সংগ্রহ
+    const formData = new FormData(form);
+    const profileData = {
+      user_id: user.id,
+      full_name: formData.get('name'),
+      phone: formData.get('phone'),
+      nid: formData.get('nid'),
+      occupation: formData.get('job'),
+      monthly_income: Number(formData.get('income')),
+    };
+
+    // ৩. প্রোফাইল টেবিলে ডেটা ইনসার্ট
+    const { error: profileError } = await supabase.from('profiles').insert(profileData);
+    if (profileError) {
+      msg.textContent = '❌ প্রোফাইল সংরক্ষণে ত্রুটি: ' + profileError.message;
+      msg.style.color = 'var(--danger)';
+      return;
+    }
+
+    // ৪. লোন আবেদন টেবিলে ডেটা ইনসার্ট
+    const loanAmount = Number(formData.get('loanAmount').replace(/,/g, ''));
+    const loanData = {
+      user_id: user.id,
+      amount: loanAmount,
+      term_months: 12, // স্লাইডার থেকে ডাইনামিকভাবে নিতে পারেন
+      deposit_amount: loanAmount * 0.10,
+      fee_amount: loanAmount * 0.10,
+    };
+
+    const { error: loanError } = await supabase.from('loan_applications').insert(loanData);
+    if (loanError) {
+      msg.textContent = '❌ লোন আবেদন সংরক্ষণে ত্রুটি: ' + loanError.message;
+      msg.style.color = 'var(--danger)';
+      return;
+    }
+
+    // সফলতা
+    msg.textContent = '✅ আপনার আবেদন সফলভাবে জমা হয়েছে! (Supabase-এ সংরক্ষিত)';
+    msg.className = 'msg ok';
+    form.reset();
+  });
+</script>
 </html>
