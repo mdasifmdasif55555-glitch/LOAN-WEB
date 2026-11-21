@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ঋণসাথী — সহজ লোন প্ল্যাটফর্ম</title>
+<title>SathiLoan — দ্রুত ও সহজ লোন</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --bg:#f5f8fb; --card:#fff; --ink:#0f172a; --muted:#64748b;
-    --line:#e2e8f0; --brand:#0d9488; --brand-dark:#0f766e;
-    --brand-soft:#ccfbf1; --warn-soft:#fef3c7; --warn:#b45309;
+    --bg:#f4f7fb; --card:#fff; --ink:#0f172a; --muted:#64748b;
+    --line:#e2e8f0; --brand:#1e40af; --brand-dark:#1e3a8a;
+    --brand-soft:#dbeafe; --warn-soft:#fef3c7; --warn:#b45309;
     --danger:#dc2626; --ok:#059669; --radius:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -88,11 +88,9 @@
   .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:12px}
   label.lbl{display:block;font-size:14px;font-weight:600;color:var(--muted);margin:18px 0 8px}
   label.lbl:first-of-type{margin-top:0}
-
   .amount-display{font-size:30px;font-weight:700;color:var(--brand);margin-bottom:6px}
   input[type=range]{width:100%;accent-color:var(--brand);height:6px;cursor:pointer}
   .range-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
-
   .term-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
   .term-btns button{
     padding:10px 0;border:1.5px solid var(--line);background:#fff;border-radius:10px;
@@ -100,7 +98,6 @@
   }
   .term-btns button:hover{border-color:var(--brand);color:var(--brand)}
   .term-btns button.active{background:var(--brand);border-color:var(--brand);color:#fff}
-
   .rate-box{background:var(--brand-soft);color:var(--brand-dark);font-weight:600;padding:10px 14px;border-radius:10px;font-size:14px}
 
   /* Breakdown */
@@ -109,9 +106,8 @@
   .breakdown li:last-child{border-bottom:none}
   .breakdown li span{color:var(--muted)}
   .breakdown li b{font-weight:600}
-  .breakdown li.net{background:#f0fdfa;margin:6px -10px;padding:12px 10px;border-radius:10px;border-bottom:none}
+  .breakdown li.net{background:#eff6ff;margin:6px -10px;padding:12px 10px;border-radius:10px;border-bottom:none}
   .breakdown li.net b{color:var(--brand-dark);font-size:17px}
-
   .emi-box{
     margin-top:16px;padding:16px;border-radius:12px;
     background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:#fff;
@@ -119,7 +115,6 @@
   }
   .emi-box span{font-size:14px;opacity:.9}
   .emi-box b{font-size:24px;font-weight:700}
-
   .note{font-size:12.5px;color:var(--muted);margin-top:12px}
 
   /* Features */
@@ -207,7 +202,7 @@
 
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="brand" href="#" onclick="go('home');return false">ঋণ<span>সাথী</span></a>
+    <a class="brand" href="#" onclick="go('home');return false">Sathi<span>Loan</span></a>
     <nav>
       <a href="#" onclick="go('home');return false">হোম</a>
       <a href="#" onclick="go('apply');return false">আবেদন</a>
@@ -221,8 +216,8 @@
   <!-- ============ HOME / CALCULATOR ============ -->
   <section id="page-home">
     <div class="hero wrap">
-      <h1>সহজে, দ্রুত, <em>স্বচ্ছ</em> লোন</h1>
-      <p>১০,০০০ টাকা থেকে শুরু · ৬% বার্ষিক সুদ · সম্পূর্ণ অনলাইনে</p>
+      <h1>দ্রুত ও সহজ <em>লোন</em></h1>
+      <p>৯১ থেকে ১৮০ দিনের মেয়াদ · ১৮%–২৬% বার্ষিক সুদ · অনলাইনে আবেদন</p>
       <button class="btn" onclick="go('apply')">এখনই আবেদন করুন</button>
     </div>
 
@@ -236,14 +231,14 @@
 
         <label class="lbl">পরিশোধের মেয়াদ</label>
         <div class="term-btns" id="termBtns">
-          <button type="button" data-m="3">৩ মাস</button>
-          <button type="button" data-m="6">৬ মাস</button>
-          <button type="button" data-m="12" class="active">১২ মাস</button>
-          <button type="button" data-m="24">২৪ মাস</button>
+          <button type="button" data-m="3">৯১ দিন</button>
+          <button type="button" data-m="6">১২০ দিন</button>
+          <button type="button" data-m="9">১৫০ দিন</button>
+          <button type="button" data-m="12" class="active">১৮০ দিন</button>
         </div>
 
         <label class="lbl">সুদের হার</label>
-        <div class="rate-box">৬% বার্ষিক (ফ্ল্যাট)</div>
+        <div class="rate-box">১৮% – ২৬% বার্ষিক (ফ্ল্যাট)</div>
       </div>
 
       <div class="card">
@@ -253,7 +248,7 @@
           <li><span>নিরাপত্তা আমানত (১০%)</span><b id="bDeposit">৳ ১,০০০</b></li>
           <li><span>প্রসেসিং ফি (১০%)</span><b id="bFee">৳ ১,০০০</b></li>
           <li class="net"><span>আপনি হাতে পাবেন</span><b id="bNet">৳ ৮,০০০</b></li>
-          <li><span>মোট সুদ (৬%)</span><b id="bInterest">৳ ৬০০</b></li>
+          <li><span>মোট সুদ (১৮%–২৬%)</span><b id="bInterest">৳ ৬০০</b></li>
           <li><span>মোট পরিশোধযোগ্য</span><b id="bTotal">৳ ১০,৬০০</b></li>
         </ul>
         <div class="emi-box">
@@ -324,12 +319,12 @@
             </select>
           </div>
           <div class="field">
-            <label>মেয়াদ (মাস)</label>
+            <label>মেয়াদ</label>
             <select name="term" required>
-              <option value="3">৩ মাস</option>
-              <option value="6">৬ মাস</option>
-              <option value="12" selected>১২ মাস</option>
-              <option value="24">২৪ মাস</option>
+              <option value="3">৯১ দিন</option>
+              <option value="6">১২০ দিন</option>
+              <option value="9">১৫০ দিন</option>
+              <option value="12" selected>১৮০ দিন</option>
             </select>
           </div>
         </div>
@@ -417,8 +412,8 @@
 
 <footer>
   <div class="wrap">
-    <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">ঋণসাথী</div>
-    <div>একটি ডেমো লোন প্ল্যাটফর্ম প্রোটোটাইপ।</div>
+    <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">SathiLoan</div>
+    <div>দ্রুত ও সহজ লোন প্ল্যাটফর্ম প্রোটোটাইপ।</div>
     <p class="legal">
       <strong>আইনি সতর্কতা:</strong> বাংলাদেশে অনুমোদন ছাড়া ডিজিটাল মাধ্যমে ঋণ প্রদান বা সুদ আদায় অবৈধ।
       বাংলাদেশ ব্যাংক / MRA লাইসেন্স, AML/KYC ও গ্রাহক সুরক্ষা নীতি মানা বাধ্যতামূলক।
@@ -475,7 +470,6 @@ sb.auth.onAuthStateChange(async (_event, session) => {
   isAdmin = false;
 
   if(currentUser){
-    // Try fetch admin flag; ignore errors silently
     try{
       const { data } = await sb.from('profiles')
         .select('is_admin').eq('user_id', currentUser.id).maybeSingle();
@@ -577,7 +571,7 @@ function updateApplyGate(){
 }
 
 /* =========================================================
-   7) APPLY FORM SUBMIT  (single handler)
+   7) APPLY FORM SUBMIT
 ========================================================= */
 $('applyForm').addEventListener('submit', async e => {
   e.preventDefault();
@@ -602,7 +596,6 @@ $('applyForm').addEventListener('submit', async e => {
     const amount = Number(fd.get('loanAmount'));
     const term   = Number(fd.get('term'));
 
-    // ১. profile upsert
     const { error: pErr } = await sb.from('profiles').upsert({
       user_id: currentUser.id,
       full_name:      fd.get('name'),
@@ -613,7 +606,6 @@ $('applyForm').addEventListener('submit', async e => {
     }, { onConflict: 'user_id' });
     if(pErr) throw new Error('Profile: ' + pErr.message);
 
-    // ২. loan insert
     const { error: lErr } = await sb.from('loan_applications').insert({
       user_id:        currentUser.id,
       amount,
@@ -660,7 +652,7 @@ async function loadDashboard(){
   }
 
   box.innerHTML = data.map(l => {
-    const emi = (l.amount + l.amount * 0.06 * (l.term_months / 12)) / l.term_months;
+    const emi = (l.amount + l.amount * 0.18 * (l.term_months / 12)) / l.term_months;
     const canPay = l.status === 'disbursed' || l.status === 'approved';
     return `
       <div class="loan-item">
@@ -765,11 +757,11 @@ async function updateStatus(id, status){
 /* =========================================================
    10) CALCULATOR
 ========================================================= */
-const RATE = 0.06;  // বার্ষিক ফ্ল্যাট সুদ
+const RATE = 0.18;  // বার্ষিক ফ্ল্যাট সুদ (ডিফল্ট ১৮%)
 const DEP  = 0.10;  // নিরাপত্তা আমানত
 const FEE  = 0.10;  // প্রসেসিং ফি
 
-const calcState = { amount: 10000, months: 12 };
+const calcState = { amount: 10000, months: 3 };
 
 function recalc(){
   const a = calcState.amount;
